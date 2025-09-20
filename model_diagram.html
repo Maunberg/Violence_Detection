@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Диаграмма архитектуры модели</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        .title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+        
+        .architecture {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .input-layer {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .split-layer {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .audio-branch, .visual-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .branch-title {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 200px;
+        }
+        
+        .feature-box {
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            min-width: 180px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-box:hover {
+            background: #d5dbdb;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .feature-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .feature-details {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .encoder-box {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3);
+        }
+        
+        .encoder-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .encoder-details {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .fusion-layer {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 25px 40px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+        
+        .classifier-layer {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 25px 40px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .output-layer {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .arrow {
+            font-size: 2em;
+            color: #34495e;
+            text-align: center;
+        }
+        
+        .arrow-horizontal {
+            font-size: 1.5em;
+            color: #34495e;
+        }
+        
+        .dimensions {
+            background: #34495e;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .split-layer {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .audio-branch, .visual-branch {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            <h1>🎬 Архитектура мультимодальной модели детекции насилия</h1>
+            <p>Интерактивная диаграмма архитектуры нейронной сети</p>
+        </div>
+        
+        <div class="architecture">
+            <!-- Входной слой -->
+            <div class="input-layer">
+                🎬 Входное видео
+            </div>
+            
+            <div class="arrow">↓</div>
+            
+            <!-- Разделение на модальности -->
+            <div class="split-layer">
+                <div class="audio-branch">
+                    <div class="branch-title">🔊 Аудио поток</div>
+                    
+                    <div class="feature-box">
+                        <div class="feature-title">MFCC</div>
+                        <div class="feature-details">13 коэффициентов × 2</div>
+                        <div class="dimensions">26 признаков</div>
+                    </div>
+                    
+                    <div class="feature-box">
+                        <div class="feature-title">Спектральные</div>
+                        <div class="feature-details">Центроид, полоса, контраст</div>
+                        <div class="dimensions">12 признаков</div>
+                    </div>
+                    
+                    <div class="feature-box">
+                        <div class="feature-title">Ритм</div>
+                        <div class="feature-details">Tempo, beat tracking</div>
+                        <div class="dimensions">2 признака</div>
+                    </div>
+                    
+                    <div class="arrow-horizontal">↓</div>
+                    
+                    <div class="encoder-box">
+                        <div class="encoder-title">Аудио энкодер</div>
+                        <div class="encoder-details">3 слоя: [512, 256, 128]<br/>LayerNorm + ReLU + Dropout</div>
+                        <div class="dimensions">40 → 128</div>
+                    </div>
+                </div>
+                
+                <div class="visual-branch">
+                    <div class="branch-title">🎥 Визуальный поток</div>
+                    
+                    <div class="feature-box">
+                        <div class="feature-title">CNN</div>
+                        <div class="feature-details">MobileNet-V3 (576×3)</div>
+                        <div class="dimensions">1728 признаков</div>
+                    </div>
+                    
+                    <div class="feature-box">
+                        <div class="feature-title">Цветовые</div>
+                        <div class="feature-details">RGB + гистограмма яркости</div>
+                        <div class="dimensions">38 признаков</div>
+                    </div>
+                    
+                    <div class="feature-box">
+                        <div class="feature-title">Текстуры</div>
+                        <div class="feature-details">Градиенты Sobel</div>
+                        <div class="dimensions">3 признака</div>
+                    </div>
+                    
+                    <div class="feature-box">
+                        <div class="feature-title">Движение</div>
+                        <div class="feature-details">Разность кадров</div>
+                        <div class="dimensions">3 признака</div>
+                    </div>
+                    
+                    <div class="arrow-horizontal">↓</div>
+                    
+                    <div class="encoder-box">
+                        <div class="encoder-title">Визуальный энкодер</div>
+                        <div class="encoder-details">3 слоя: [1024, 512, 256]<br/>LayerNorm + ReLU + Dropout</div>
+                        <div class="dimensions">1772 → 256</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="arrow">↓</div>
+            
+            <!-- Слой слияния -->
+            <div class="fusion-layer">
+                🧠 Attention Fusion<br>
+                <small>Multi-head Attention (8 heads)<br/>Linear проекции + LayerNorm</small>
+                <div class="dimensions">128 + 256 → 128</div>
+            </div>
+            
+            <div class="arrow">↓</div>
+            
+            <!-- Классификатор -->
+            <div class="classifier-layer">
+                🎯 Классификатор<br>
+                <small>2 слоя: [256, 128] + выход<br/>LayerNorm + ReLU + Dropout(0.5)</small>
+                <div class="dimensions">128 → 2</div>
+            </div>
+            
+            <div class="arrow">↓</div>
+            
+            <!-- Выходной слой -->
+            <div class="output-layer">
+                📊 Результат<br>
+                <small>Violent / Non-violent</small>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
