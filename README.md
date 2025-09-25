@@ -276,9 +276,6 @@ python main_pipeline.py --features-comp --epochs 5 --batch-size 8
 
 
 
-
-```
-
 ---
 
 ## 🛠️ Технические детали
@@ -317,36 +314,32 @@ python main_pipeline.py --features-comp --epochs 5 --batch-size 8
 ---
 
 ## 📁 Структура проекта
-
 ```
-lab_1/
-├── 📄 Violence_Detection/           # Основная директория проекта
-│   ├── 🧠 Модели
-│   │   ├── multimodal_model.py      # Архитектура мультимодальной модели
-│   │   ├── train_model.py           # Обучение модели
-│   │   └── test_model.py            # Тестирование модели
-│   │
-│   ├── 🔍 Извлечение признаков
-│   │   ├── audio_features.py        # Аудио признаки
-│   │   └── visual_features.py       # Визуальные признаки
-│   │
-│   ├── 🛠️ Утилиты
-│   │   ├── main_pipeline.py         # Главный пайплайн
-│   │   ├── test.py                  # Классификация видео
-│   │   └── gradio_app.py            # Веб-интерфейс
-│   │
-│   ├── 📊 Результаты
-│   │   ├── models/                  # Обученные модели
-│   │   ├── test_results/            # Результаты тестирования
-│   │   ├── audio_features/          # Аудио признаки
-│   │   └── visual_features/         # Визуальные признаки
-│   │
-│   └── 📚 Документация
-│       ├── README.md                # Документация проекта
-│       ├── INSTALL.md               # Инструкции по установке
-│       └── requirements.txt         # Зависимости
+📄 Violence_Detection/           # Основная директория проекта
+├── 🧠 Модели
+│   ├── multimodal_model.py      # Архитектура мультимодальной модели
+│   ├── train_model.py           # Обучение модели
+│   └── test_model.py            # Тестирование модели
 │
-└── 📄 README.md                     # Этот файл
+├── 🔍 Извлечение признаков
+│   ├── audio_features.py        # Аудио признаки
+│   └── visual_features.py       # Визуальные признаки
+│
+├── 🛠️ Утилиты
+│   ├── main_pipeline.py         # Главный пайплайн
+│   ├── test.py                  # Классификация видео
+│   └── gradio_app.py            # Веб-интерфейс
+│
+├── 📊 Результаты
+│   ├── models/                  # Обученные модели
+│   ├── test_results/            # Результаты тестирования
+│   ├── audio_features/          # Аудио признаки
+│   └── visual_features/         # Визуальные признаки
+│
+└── 📚 Документация
+    ├── README.md                # Документация проекта
+    ├── INSTALL.md               # Инструкции по установке
+    └── requirements.txt         # Зависимости
 ```
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-black?logo=github)](https://github.com)
