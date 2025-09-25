@@ -25,8 +25,17 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir gradio==3.50.2
 
-# Копируем весь проект
-COPY . .
+# Копируем только необходимые Python файлы
+COPY gradio_app.py .
+COPY test.py .
+COPY multimodal_model.py .
+COPY visual_features.py .
+COPY audio_features.py .
+
+# Копируем только необходимые файлы моделей
+COPY models/best_model.pth models/
+COPY models/scaler_audio.pkl models/
+COPY models/scaler_visual.pkl models/
 
 # Создаем директорию для временных файлов
 RUN mkdir -p /tmp/violence_detection
