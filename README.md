@@ -147,13 +147,13 @@ graph TD
 <div align="center">
 
 #### Матрица ошибок
-![Confusion Matrix](Violence_Detection/test_results/confusion_matrix.png)
+![Confusion Matrix](test_results/confusion_matrix.png)
 
 #### ROC кривая
-![ROC Curve](Violence_Detection/test_results/roc_curve.png)
+![ROC Curve](test_results/roc_curve.png)
 
 #### t-SNE визуализация эмбеддингов
-![t-SNE Embeddings](Violence_Detection/test_results/embeddings_tsne.png)
+![t-SNE Embeddings](test_results/embeddings_tsne.png)
 
 </div>
 
@@ -267,10 +267,10 @@ python Violence_Detection/gradio_app.py
 <div align="center">
 
 #### Сравнение модальностей
-![Feature Importance Comparison](Violence_Detection/test_results/feature_importance_comparison.png)
+![Feature Importance Comparison](test_results/feature_importance_comparison.png)
 
 #### Тепловая карта важности
-![Feature Importance Heatmap](Violence_Detection/test_results/feature_importance_heatmap.png)
+![Feature Importance Heatmap](test_results/feature_importance_heatmap.png)
 
 </div>
 
