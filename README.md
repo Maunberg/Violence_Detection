@@ -301,11 +301,14 @@ python main_pipeline.py --features-comp --epochs 5 --batch-size 8
 
 <div align="center">
 
-#### Сравнение модальностей
-![Feature Importance Comparison](test_results/feature_importance_comparison.png)
+#### Матрица ошибок
+![Confusion Matrix](test_results/confusion_matrix.png)
 
-#### Тепловая карта важности
-![Feature Importance Heatmap](test_results/feature_importance_heatmap.png)
+#### ROC кривая
+![ROC Curve](test_results/roc_curve.png)
+
+#### t-SNE визуализация эмбеддингов
+![t-SNE Embeddings](test_results/embeddings_tsne.png)
 
 </div>
 
