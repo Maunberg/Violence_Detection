@@ -65,7 +65,7 @@ class MultimodalDataset(Dataset):
         
         for key in self.keys:
             # Аудио фичи (если доступны)
-            if self.audio_features:
+            if self.audio_features and key in self.audio_features:
                 audio_feat = self.audio_features[key]
                 audio_vector = self._extract_audio_vector(audio_feat)
                 if audio_vector is not None:
@@ -77,7 +77,7 @@ class MultimodalDataset(Dataset):
                 audio_data.append(np.zeros(26))  # Размер аудио вектора
             
             # Визуальные фичи (если доступны)
-            if self.visual_features:
+            if self.visual_features and key in self.visual_features:
                 visual_feat = self.visual_features[key]
                 visual_vector = self._extract_visual_vector(visual_feat)
                 if visual_vector is not None:
@@ -514,17 +514,17 @@ def create_data_loaders(audio_features_path, visual_features_path, df_path,
         val_keys, test_keys = train_test_split(temp_keys, test_size=test_size/(test_size + val_size), 
                                              random_state=random_state, stratify=[labels_filtered[k] for k in temp_keys])
     
-    # Создаем датасеты
-    train_audio = {k: audio_features_filtered[k] for k in train_keys}
-    train_visual = {k: visual_features_filtered[k] for k in train_keys}
+    # Создаем датасеты (обрабатываем пустые словари)
+    train_audio = {k: audio_features_filtered[k] for k in train_keys} if audio_features_filtered else {}
+    train_visual = {k: visual_features_filtered[k] for k in train_keys} if visual_features_filtered else {}
     train_labels = {k: labels_filtered[k] for k in train_keys}
     
-    val_audio = {k: audio_features_filtered[k] for k in val_keys}
-    val_visual = {k: visual_features_filtered[k] for k in val_keys}
+    val_audio = {k: audio_features_filtered[k] for k in val_keys} if audio_features_filtered else {}
+    val_visual = {k: visual_features_filtered[k] for k in val_keys} if visual_features_filtered else {}
     val_labels = {k: labels_filtered[k] for k in val_keys}
     
-    test_audio = {k: audio_features_filtered[k] for k in test_keys}
-    test_visual = {k: visual_features_filtered[k] for k in test_keys}
+    test_audio = {k: audio_features_filtered[k] for k in test_keys} if audio_features_filtered else {}
+    test_visual = {k: visual_features_filtered[k] for k in test_keys} if visual_features_filtered else {}
     test_labels = {k: labels_filtered[k] for k in test_keys}
     
     # Создаем датасеты
