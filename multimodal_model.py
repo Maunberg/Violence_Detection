@@ -28,8 +28,18 @@ class MultimodalDataset(Dataset):
         self.visual_features = visual_features
         self.labels = labels
         
-        # Получаем общие ключи
-        self.keys = list(set(audio_features.keys()) & set(visual_features.keys()) & set(labels.keys()))
+        # Получаем общие ключи (обрабатываем пустые словари)
+        if audio_features and visual_features:
+            # Оба типа фичей доступны
+            self.keys = list(set(audio_features.keys()) & set(visual_features.keys()) & set(labels.keys()))
+        elif audio_features and not visual_features:
+            # Только аудио
+            self.keys = list(set(audio_features.keys()) & set(labels.keys()))
+        elif not audio_features and visual_features:
+            # Только визуальные
+            self.keys = list(set(visual_features.keys()) & set(labels.keys()))
+        else:
+            raise ValueError("Хотя бы один тип фичей должен быть доступен")
         
         # Подготавливаем фичи
         self.audio_data, self.visual_data, self.label_data = self._prepare_features()
@@ -54,21 +64,29 @@ class MultimodalDataset(Dataset):
         label_data = []
         
         for key in self.keys:
-            # Аудио фичи
-            audio_feat = self.audio_features[key]
-            audio_vector = self._extract_audio_vector(audio_feat)
-            if audio_vector is not None:
-                audio_data.append(audio_vector)
+            # Аудио фичи (если доступны)
+            if self.audio_features:
+                audio_feat = self.audio_features[key]
+                audio_vector = self._extract_audio_vector(audio_feat)
+                if audio_vector is not None:
+                    audio_data.append(audio_vector)
+                else:
+                    continue
             else:
-                continue
+                # Создаем нулевой вектор для аудио
+                audio_data.append(np.zeros(26))  # Размер аудио вектора
             
-            # Визуальные фичи
-            visual_feat = self.visual_features[key]
-            visual_vector = self._extract_visual_vector(visual_feat)
-            if visual_vector is not None:
-                visual_data.append(visual_vector)
+            # Визуальные фичи (если доступны)
+            if self.visual_features:
+                visual_feat = self.visual_features[key]
+                visual_vector = self._extract_visual_vector(visual_feat)
+                if visual_vector is not None:
+                    visual_data.append(visual_vector)
+                else:
+                    continue
             else:
-                continue
+                # Создаем нулевой вектор для визуальных фичей
+                visual_data.append(np.zeros(512))  # Размер визуального вектора
             
             # Метка
             label_data.append(self.labels[key])
@@ -343,12 +361,31 @@ class MultimodalViolenceClassifier(nn.Module):
         self.classifier = nn.Sequential(*classifier_layers)
     
     def forward(self, audio_input, visual_input):
-        # Кодируем каждую модальность
-        audio_features = self.audio_encoder(audio_input)
-        visual_features = self.visual_encoder(visual_input)
-        
-        # Сливаем модальности с вниманием
-        fused_features = self.fusion(audio_features, visual_features)
+        # Обрабатываем случаи, когда один из входов None
+        if audio_input is not None and visual_input is not None:
+            # Оба входа доступны - стандартная обработка
+            audio_features = self.audio_encoder(audio_input)
+            visual_features = self.visual_encoder(visual_input)
+            fused_features = self.fusion(audio_features, visual_features)
+        elif audio_input is not None and visual_input is None:
+            # Только аудио
+            audio_features = self.audio_encoder(audio_input)
+            # Создаем нулевые визуальные фичи
+            batch_size = audio_input.size(0)
+            visual_features = torch.zeros(batch_size, self.visual_encoder.output_dim, 
+                                        device=audio_input.device, dtype=audio_input.dtype)
+            fused_features = self.fusion(audio_features, visual_features)
+        elif audio_input is None and visual_input is not None:
+            # Только визуальные
+            visual_features = self.visual_encoder(visual_input)
+            # Создаем нулевые аудио фичи
+            batch_size = visual_input.size(0)
+            audio_features = torch.zeros(batch_size, self.audio_encoder.output_dim, 
+                                      device=visual_input.device, dtype=visual_input.dtype)
+            fused_features = self.fusion(audio_features, visual_features)
+        else:
+            # Оба входа None - ошибка
+            raise ValueError("Оба входа не могут быть None одновременно")
         
         # Классификация
         output = self.classifier(fused_features)
@@ -358,8 +395,25 @@ class MultimodalViolenceClassifier(nn.Module):
     def get_embeddings(self, audio_input, visual_input):
         """Получение эмбеддингов для анализа"""
         with torch.no_grad():
-            audio_features = self.audio_encoder(audio_input)
-            visual_features = self.visual_encoder(visual_input)
+            if audio_input is not None and visual_input is not None:
+                # Оба входа доступны
+                audio_features = self.audio_encoder(audio_input)
+                visual_features = self.visual_encoder(visual_input)
+            elif audio_input is not None and visual_input is None:
+                # Только аудио
+                audio_features = self.audio_encoder(audio_input)
+                batch_size = audio_input.size(0)
+                visual_features = torch.zeros(batch_size, self.visual_encoder.output_dim, 
+                                          device=audio_input.device, dtype=audio_input.dtype)
+            elif audio_input is None and visual_input is not None:
+                # Только визуальные
+                visual_features = self.visual_encoder(visual_input)
+                batch_size = visual_input.size(0)
+                audio_features = torch.zeros(batch_size, self.audio_encoder.output_dim, 
+                                        device=visual_input.device, dtype=visual_input.dtype)
+            else:
+                raise ValueError("Оба входа не могут быть None одновременно")
+            
             fused_features = self.fusion(audio_features, visual_features)
             return fused_features
 
@@ -368,12 +422,17 @@ def create_data_loaders(audio_features_path, visual_features_path, df_path,
                        test_size=0.2, val_size=0.1, batch_size=32, random_state=42):
     """Создание загрузчиков данных"""
     
-    # Загружаем фичи
-    with open(audio_features_path, 'rb') as f:
-        audio_features = pickle.load(f)
+    # Загружаем фичи (обрабатываем None значения)
+    audio_features = {}
+    visual_features = {}
     
-    with open(visual_features_path, 'rb') as f:
-        visual_features = pickle.load(f)
+    if audio_features_path is not None:
+        with open(audio_features_path, 'rb') as f:
+            audio_features = pickle.load(f)
+    
+    if visual_features_path is not None:
+        with open(visual_features_path, 'rb') as f:
+            visual_features = pickle.load(f)
     
     # Загружаем метаданные
     df = pd.read_csv(df_path)
@@ -385,15 +444,49 @@ def create_data_loaders(audio_features_path, visual_features_path, df_path,
         key = f"{row['teg']}_{row['part']}_{video_name}"
         labels[key] = 1 if row['teg'] == 'violent' else 0
     
-    # Получаем общие ключи
-    common_keys = set(audio_features.keys()) & set(visual_features.keys()) & set(labels.keys())
+    print(f"Количество меток: {len(labels)}")
+    print(f"Примеры ключей меток: {list(labels.keys())[:5]}")
     
-    # Фильтруем данные
-    audio_features_filtered = {k: audio_features[k] for k in common_keys}
-    visual_features_filtered = {k: visual_features[k] for k in common_keys}
+    if audio_features:
+        print(f"Примеры ключей аудио: {list(audio_features.keys())[:5]}")
+    if visual_features:
+        print(f"Примеры ключей визуальных: {list(visual_features.keys())[:5]}")
+    
+    # Получаем общие ключи (учитываем None значения)
+    if audio_features_path is not None and visual_features_path is not None:
+        # Оба типа фичей доступны
+        common_keys = set(audio_features.keys()) & set(visual_features.keys()) & set(labels.keys())
+        audio_features_filtered = {k: audio_features[k] for k in common_keys}
+        visual_features_filtered = {k: visual_features[k] for k in common_keys}
+    elif audio_features_path is not None and visual_features_path is None:
+        # Только аудио
+        common_keys = set(audio_features.keys()) & set(labels.keys())
+        audio_features_filtered = {k: audio_features[k] for k in common_keys}
+        visual_features_filtered = {}  # Пустой словарь
+    elif audio_features_path is None and visual_features_path is not None:
+        # Только визуальные
+        common_keys = set(visual_features.keys()) & set(labels.keys())
+        audio_features_filtered = {}  # Пустой словарь
+        visual_features_filtered = {k: visual_features[k] for k in common_keys}
+    else:
+        raise ValueError("Хотя бы один из путей к фичам должен быть не None")
+    
     labels_filtered = {k: labels[k] for k in common_keys}
     
     print(f"Общее количество образцов: {len(common_keys)}")
+    if len(common_keys) == 0:
+        print("❌ Нет общих ключей между фичами и метками!")
+        print("Проверьте формат ключей в файлах фичей и CSV файле")
+        
+        # Показываем примеры ключей для отладки
+        if audio_features:
+            print(f"Примеры ключей аудио: {list(audio_features.keys())[:3]}")
+        if visual_features:
+            print(f"Примеры ключей визуальных: {list(visual_features.keys())[:3]}")
+        print(f"Примеры ключей меток: {list(labels.keys())[:3]}")
+        
+        raise ValueError("Нет общих ключей между фичами и метками")
+    
     print(f"Violent: {sum(labels_filtered.values())}")
     print(f"Non-violent: {len(labels_filtered) - sum(labels_filtered.values())}")
     
