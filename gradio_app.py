@@ -57,9 +57,12 @@ class GradioViolenceClassifier:
             return "Пожалуйста, загрузите видео файл", None
         
         try:
+            # Получаем путь к файлу
+            video_path = video_file.name if hasattr(video_file, 'name') else str(video_file)
+            
             # Классифицируем видео
             class_name, probabilities = self.classifier.classify_video(
-                video_file.name, return_probabilities=True
+                video_path, return_probabilities=True
             )
             
             # Формируем результат
@@ -97,9 +100,12 @@ class GradioViolenceClassifier:
             return "Пожалуйста, загрузите видео файл", None
         
         try:
+            # Получаем путь к файлу
+            video_path = video_file.name if hasattr(video_file, 'name') else str(video_file)
+            
             # Классифицируем видео по батчам
             overall_class, batch_probs, time_stamps = self.classifier.classify_video_batch(
-                video_file.name, batch_size=batch_size, overlap=overlap
+                video_path, batch_size=batch_size, overlap=overlap
             )
             
             # Формируем текстовый результат
@@ -236,8 +242,7 @@ def create_gradio_interface():
                     with gr.Column(scale=1):
                         simple_video = gr.File(
                             label="Загрузить видео",
-                            file_types=["video"],
-                            type="filepath"
+                            file_types=["video"]
                         )
                         simple_btn = gr.Button("Классифицировать", variant="primary", size="lg")
                     
@@ -264,8 +269,7 @@ def create_gradio_interface():
                     with gr.Column(scale=1):
                         graph_video = gr.File(
                             label="Загрузить видео",
-                            file_types=["video"],
-                            type="filepath"
+                            file_types=["video"]
                         )
                         
                         with gr.Group():

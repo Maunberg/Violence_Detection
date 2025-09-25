@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  violence-detection:
+    build: .
+    container_name: violence-detection-app
+    ports:
+      - "7862:7861"
+    volumes:
+      # Монтируем модели для доступа из контейнера
+      - ./models:/app/models:ro
+      # Монтируем директорию для временных файлов
+      - ./temp:/tmp/violence_detection
+    environment:
+      - PYTHONPATH=/app
+      - GRADIO_SERVER_NAME=0.0.0.0
+      - GRADIO_SERVER_PORT=7861
+    restart: unless-stopped
+    # Ограничения ресурсов (опционально)
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+    # Для GPU поддержки (раскомментировать при необходимости)
+    # runtime: nvidia
+    # environment:
+    #   - NVIDIA_VISIBLE_DEVICES=all
