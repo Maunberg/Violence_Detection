@@ -282,6 +282,7 @@ class AttentionFusion(nn.Module):
         
         self.audio_proj = nn.Linear(audio_dim, hidden_dim)
         self.visual_proj = nn.Linear(visual_dim, hidden_dim)
+        self.fusion_proj = nn.Linear(hidden_dim * 2, hidden_dim)  # для обработки объединенных признаков
         self.attention = nn.MultiheadAttention(hidden_dim, num_heads=8, batch_first=True)
         self.norm = nn.LayerNorm(hidden_dim)
     
@@ -290,17 +291,18 @@ class AttentionFusion(nn.Module):
         audio_proj = self.audio_proj(audio_feat).unsqueeze(1)  # [batch, 1, hidden_dim]
         visual_proj = self.visual_proj(visual_feat).unsqueeze(1)  # [batch, 1, hidden_dim]
         
-        # Объединяем фичи
-        combined = torch.cat([audio_proj, visual_proj], dim=1)  # [batch, 2, hidden_dim]
+        # Создаем фьюзию признаков и обрабатываем через дополнительный слой
+        fused_raw = torch.cat([audio_proj, visual_proj], dim=1)  # [batch, 2, hidden_dim]
+        fused_features = self.fusion_proj(fused_raw.view(-1, fused_raw.size(-1) * 2)).unsqueeze(1)  # [batch, 1, hidden_dim]
         
-        # Применяем self-attention
-        attended, _ = self.attention(combined, combined, combined)
+        # Применяем cross-attention: audio как query, visual как key, processed fused как value
+        attended, _ = self.attention(audio_proj, visual_proj, fused_features)
         
         # Нормализация
         attended = self.norm(attended)
         
-        # Глобальное усреднение
-        fused = torch.mean(attended, dim=1)  # [batch, hidden_dim]
+        # Убираем лишнее измерение
+        fused = attended.squeeze(1)  # [batch, hidden_dim]
         
         return fused
 

@@ -74,7 +74,7 @@ class VideoViolenceClassifier:
         
         # Загружаем веса
         checkpoint = torch.load(model_path, map_location=self.device)
-        model.load_state_dict(checkpoint['model_state_dict'])
+        model.load_state_dict(checkpoint['model_state_dict'], strict=False)
         model.to(self.device)
         model.eval()
         
