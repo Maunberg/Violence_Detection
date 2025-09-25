@@ -442,7 +442,7 @@ def create_data_loaders(audio_features_path, visual_features_path, df_path,
     for _, row in df.iterrows():
         video_name = Path(row['way']).stem
         key = f"{row['teg']}_{row['part']}_{video_name}"
-        labels[key] = 1 if row['teg'] == 'violent' else 0
+        labels[key] = int(row['teg'])  # teg уже содержит 0 или 1
     
     print(f"Количество меток: {len(labels)}")
     print(f"Примеры ключей меток: {list(labels.keys())[:5]}")
